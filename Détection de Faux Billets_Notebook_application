@@ -1,0 +1,545 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "gtNfVlfAyUrJ"
+      },
+      "source": [
+        "# Application : Détection de faux billets\n",
+        "\n",
+        "Ce notebook permet de tester si un billet est authentique ou faux à partir de ses caractéristiques physiques, en utilisant un modèle entraîné."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "HlARXvvvyUrM"
+      },
+      "execution_count": 2,
+      "outputs": [],
+      "source": [
+        "# 1. Chargement des bibliothèques\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import joblib\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "from sklearn.linear_model import LogisticRegression"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "YBbOOi4iyUrN"
+      },
+      "source": [
+        "## 2. Chargement du modèle et du scaler"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "x5hWSqmjyUrN",
+        "outputId": "ad8712a6-0869-47be-f7e4-4d82c10d8db9"
+      },
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ],
+      "source": [
+        "# Charger le modèle et le scaler préalablement sauvegardés\n",
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')\n",
+        "\n",
+        "import joblib\n",
+        "\n",
+        "model = joblib.load(\"/content/drive/MyDrive/Colab Notebooks/model_billets.pkl\")\n",
+        "scaler = joblib.load(\"/content/drive/MyDrive/Colab Notebooks/scaler_billets.pkl\")"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "iin7ygndyUrN"
+      },
+      "source": [
+        "## 3. Fonction de prédiction"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2Ez-G-hVyUrN"
+      },
+      "execution_count": 4,
+      "outputs": [],
+      "source": [
+        "def predire_billet(data_dict):\n",
+        "    import pandas as pd\n",
+        "    input_df = pd.DataFrame([data_dict])  # conversion en DataFrame\n",
+        "    input_scaled = scaler.transform(input_df)  # normalisation\n",
+        "    prediction = model.predict(input_scaled)\n",
+        "    proba = model.predict_proba(input_scaled)\n",
+        "    return prediction[0], proba[0]\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "jYRVN7RSyUrN"
+      },
+      "source": [
+        "## 4. Exemple d'utilisation"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Exemple 1 :"
+      ],
+      "metadata": {
+        "id": "UpY92GKLq02g"
+      }
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "dI_ZJ0B1yUrO",
+        "outputId": "009c4f7f-780a-4bc3-847e-b5dfcb51f24d"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " Billet Authentique\n",
+            "Probabilités : Vrai = 69.0% | Faux = 31.0%\n"
+          ]
+        }
+      ],
+      "source": [
+        "exemple_billet = {\n",
+        "    'diagonal': 171.0,\n",
+        "    'height_left': 103.5,\n",
+        "    'height_right': 104.2,\n",
+        "    'margin_low': 4.0,\n",
+        "    'margin_up': 14.5,\n",
+        "    'length': 113.0\n",
+        "}\n",
+        "\n",
+        "#Prédiction\n",
+        "classe, probabilites = predire_billet(exemple_billet)\n",
+        "\n",
+        "#Affichage du résultat\n",
+        "print(\" Billet Authentique\" if classe == 1 else \" Faux billet\")\n",
+        "print(f\"Probabilités : Vrai = {round(probabilites[1]*100, 2)}% | Faux = {round(probabilites[0]*100, 2)}%\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "df = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/billets_test.csv')\n",
+        "df.head()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 143
+        },
+        "id": "HyEqND1HrGZV",
+        "outputId": "b0fe0e12-605f-4549-b1e3-2ce44ce29e59"
+      },
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "   diagonal  height_left  height_right  margin_low  margin_up  length\n",
+              "0     171.0        103.5         104.2         4.0       14.5   113.0\n",
+              "1     168.4        102.0         102.5         3.7       13.0   111.8\n",
+              "2     170.2        104.1         103.9         4.2       14.2   112.5"
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-1a9ecf16-ac77-4075-b095-7d64062c0056\" class=\"colab-df-container\">\n",
+              "    <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>diagonal</th>\n",
+              "      <th>height_left</th>\n",
+              "      <th>height_right</th>\n",
+              "      <th>margin_low</th>\n",
+              "      <th>margin_up</th>\n",
+              "      <th>length</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>171.0</td>\n",
+              "      <td>103.5</td>\n",
+              "      <td>104.2</td>\n",
+              "      <td>4.0</td>\n",
+              "      <td>14.5</td>\n",
+              "      <td>113.0</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>168.4</td>\n",
+              "      <td>102.0</td>\n",
+              "      <td>102.5</td>\n",
+              "      <td>3.7</td>\n",
+              "      <td>13.0</td>\n",
+              "      <td>111.8</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>170.2</td>\n",
+              "      <td>104.1</td>\n",
+              "      <td>103.9</td>\n",
+              "      <td>4.2</td>\n",
+              "      <td>14.2</td>\n",
+              "      <td>112.5</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "    <div class=\"colab-df-buttons\">\n",
+              "\n",
+              "  <div class=\"colab-df-container\">\n",
+              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-1a9ecf16-ac77-4075-b095-7d64062c0056')\"\n",
+              "            title=\"Convert this dataframe to an interactive table.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 -960 960 960\">\n",
+              "    <path d=\"M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z\"/>\n",
+              "  </svg>\n",
+              "    </button>\n",
+              "\n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-buttons div {\n",
+              "      margin-bottom: 4px;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "    <script>\n",
+              "      const buttonEl =\n",
+              "        document.querySelector('#df-1a9ecf16-ac77-4075-b095-7d64062c0056 button.colab-df-convert');\n",
+              "      buttonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "      async function convertToInteractive(key) {\n",
+              "        const element = document.querySelector('#df-1a9ecf16-ac77-4075-b095-7d64062c0056');\n",
+              "        const dataTable =\n",
+              "          await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                    [key], {});\n",
+              "        if (!dataTable) return;\n",
+              "\n",
+              "        const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "          '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "          + ' to learn more about interactive tables.';\n",
+              "        element.innerHTML = '';\n",
+              "        dataTable['output_type'] = 'display_data';\n",
+              "        await google.colab.output.renderOutput(dataTable, element);\n",
+              "        const docLink = document.createElement('div');\n",
+              "        docLink.innerHTML = docLinkHtml;\n",
+              "        element.appendChild(docLink);\n",
+              "      }\n",
+              "    </script>\n",
+              "  </div>\n",
+              "\n",
+              "\n",
+              "    <div id=\"df-d99105b3-5669-4c9d-9ab1-2b40a79aaf23\">\n",
+              "      <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-d99105b3-5669-4c9d-9ab1-2b40a79aaf23')\"\n",
+              "                title=\"Suggest charts\"\n",
+              "                style=\"display:none;\">\n",
+              "\n",
+              "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "     width=\"24px\">\n",
+              "    <g>\n",
+              "        <path d=\"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z\"/>\n",
+              "    </g>\n",
+              "</svg>\n",
+              "      </button>\n",
+              "\n",
+              "<style>\n",
+              "  .colab-df-quickchart {\n",
+              "      --bg-color: #E8F0FE;\n",
+              "      --fill-color: #1967D2;\n",
+              "      --hover-bg-color: #E2EBFA;\n",
+              "      --hover-fill-color: #174EA6;\n",
+              "      --disabled-fill-color: #AAA;\n",
+              "      --disabled-bg-color: #DDD;\n",
+              "  }\n",
+              "\n",
+              "  [theme=dark] .colab-df-quickchart {\n",
+              "      --bg-color: #3B4455;\n",
+              "      --fill-color: #D2E3FC;\n",
+              "      --hover-bg-color: #434B5C;\n",
+              "      --hover-fill-color: #FFFFFF;\n",
+              "      --disabled-bg-color: #3B4455;\n",
+              "      --disabled-fill-color: #666;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart {\n",
+              "    background-color: var(--bg-color);\n",
+              "    border: none;\n",
+              "    border-radius: 50%;\n",
+              "    cursor: pointer;\n",
+              "    display: none;\n",
+              "    fill: var(--fill-color);\n",
+              "    height: 32px;\n",
+              "    padding: 0;\n",
+              "    width: 32px;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart:hover {\n",
+              "    background-color: var(--hover-bg-color);\n",
+              "    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "    fill: var(--button-hover-fill-color);\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart-complete:disabled,\n",
+              "  .colab-df-quickchart-complete:disabled:hover {\n",
+              "    background-color: var(--disabled-bg-color);\n",
+              "    fill: var(--disabled-fill-color);\n",
+              "    box-shadow: none;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-spinner {\n",
+              "    border: 2px solid var(--fill-color);\n",
+              "    border-color: transparent;\n",
+              "    border-bottom-color: var(--fill-color);\n",
+              "    animation:\n",
+              "      spin 1s steps(1) infinite;\n",
+              "  }\n",
+              "\n",
+              "  @keyframes spin {\n",
+              "    0% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "      border-left-color: var(--fill-color);\n",
+              "    }\n",
+              "    20% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    30% {\n",
+              "      border-color: transparent;\n",
+              "      border-left-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    40% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-top-color: var(--fill-color);\n",
+              "    }\n",
+              "    60% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "    }\n",
+              "    80% {\n",
+              "      border-color: transparent;\n",
+              "      border-right-color: var(--fill-color);\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "    90% {\n",
+              "      border-color: transparent;\n",
+              "      border-bottom-color: var(--fill-color);\n",
+              "    }\n",
+              "  }\n",
+              "</style>\n",
+              "\n",
+              "      <script>\n",
+              "        async function quickchart(key) {\n",
+              "          const quickchartButtonEl =\n",
+              "            document.querySelector('#' + key + ' button');\n",
+              "          quickchartButtonEl.disabled = true;  // To prevent multiple clicks.\n",
+              "          quickchartButtonEl.classList.add('colab-df-spinner');\n",
+              "          try {\n",
+              "            const charts = await google.colab.kernel.invokeFunction(\n",
+              "                'suggestCharts', [key], {});\n",
+              "          } catch (error) {\n",
+              "            console.error('Error during call to suggestCharts:', error);\n",
+              "          }\n",
+              "          quickchartButtonEl.classList.remove('colab-df-spinner');\n",
+              "          quickchartButtonEl.classList.add('colab-df-quickchart-complete');\n",
+              "        }\n",
+              "        (() => {\n",
+              "          let quickchartButtonEl =\n",
+              "            document.querySelector('#df-d99105b3-5669-4c9d-9ab1-2b40a79aaf23 button');\n",
+              "          quickchartButtonEl.style.display =\n",
+              "            google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "        })();\n",
+              "      </script>\n",
+              "    </div>\n",
+              "\n",
+              "    </div>\n",
+              "  </div>\n"
+            ],
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "dataframe",
+              "variable_name": "df",
+              "summary": "{\n  \"name\": \"df\",\n  \"rows\": 3,\n  \"fields\": [\n    {\n      \"column\": \"diagonal\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 1.331665623695874,\n        \"min\": 168.4,\n        \"max\": 171.0,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          171.0,\n          168.4,\n          170.2\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"height_left\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 1.0816653826391944,\n        \"min\": 102.0,\n        \"max\": 104.1,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          103.5,\n          102.0,\n          104.1\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"height_right\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 0.9073771725877487,\n        \"min\": 102.5,\n        \"max\": 104.2,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          104.2,\n          102.5,\n          103.9\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"margin_low\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 0.2516611478423583,\n        \"min\": 3.7,\n        \"max\": 4.2,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          4.0,\n          3.7,\n          4.2\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"margin_up\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 0.7937253933193771,\n        \"min\": 13.0,\n        \"max\": 14.5,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          14.5,\n          13.0,\n          14.2\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    },\n    {\n      \"column\": \"length\",\n      \"properties\": {\n        \"dtype\": \"number\",\n        \"std\": 0.6027713773341723,\n        \"min\": 111.8,\n        \"max\": 113.0,\n        \"num_unique_values\": 3,\n        \"samples\": [\n          113.0,\n          111.8,\n          112.5\n        ],\n        \"semantic_type\": \"\",\n        \"description\": \"\"\n      }\n    }\n  ]\n}"
+            }
+          },
+          "metadata": {},
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "\n",
+        "# Chemin vers le fichier CSV\n",
+        "test_csv = \"/content/drive/MyDrive/Colab Notebooks/billets_test.csv\"\n",
+        "\n",
+        "# Charger le fichier\n",
+        "df_test = pd.read_csv(test_csv)\n",
+        "\n",
+        "# Standardiser les données (comme à l'entraînement)\n",
+        "X_test_scaled = scaler.transform(df_test)\n",
+        "\n",
+        "# Prédiction\n",
+        "predictions = model.predict(X_test_scaled)\n",
+        "probas = model.predict_proba(X_test_scaled)\n",
+        "\n",
+        "# Ajouter les résultats dans le DataFrame\n",
+        "df_test['Prédiction'] = predictions\n",
+        "df_test['Proba_faux'] = probas[:, 0]\n",
+        "df_test['Proba_authentique'] = probas[:, 1]\n",
+        "\n",
+        "# Affichage simplifié des résultats\n",
+        "for i in range(len(df_test)):\n",
+        "    classe = df_test.loc[i, 'Prédiction']\n",
+        "    proba_auth = df_test.loc[i, 'Proba_authentique']\n",
+        "    proba_faux = df_test.loc[i, 'Proba_faux']\n",
+        "\n",
+        "    print(f\"\\n Billet {i+1}\")\n",
+        "    print(\"Authentique\" if classe == 1 else \"Faux billet\")\n",
+        "    print(f\"Probabilités : Vrai = {round(proba_auth * 100, 2)}% | Faux = {round(proba_faux * 100, 2)}%\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Dw6RhIsfkbAV",
+        "outputId": "9bb537e0-0b3a-4977-b3df-07fdf6fad903"
+      },
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            " Billet 1\n",
+            "Authentique\n",
+            "Probabilités : Vrai = 69.0% | Faux = 31.0%\n",
+            "\n",
+            " Billet 2\n",
+            "Faux billet\n",
+            "Probabilités : Vrai = 47.0% | Faux = 53.0%\n",
+            "\n",
+            " Billet 3\n",
+            "Faux billet\n",
+            "Probabilités : Vrai = 35.0% | Faux = 65.0%\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "XeLL6kNQkd7Q"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "name": "python",
+      "version": "3.11"
+    },
+    "colab": {
+      "provenance": []
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
