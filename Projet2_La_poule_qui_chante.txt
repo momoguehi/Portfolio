@@ -1,0 +1,27 @@
+PROJET 2 – La poule qui chante (Poulet Agriculture Biologique)
+--------------------------------------------------------------
+Contexte
+Entreprise agroalimentaire souhaitant analyser ses indicateurs de production/qualité et préparer une expansion. Les données portent sur des lots de poulets avec des mesures de performance sous label biologique.
+
+Objectifs
+- Synthétiser les principaux KPI de production (rendement, qualité, mortalité, temps de croissance).
+- Mettre en évidence les tendances et facteurs explicatifs (saisonnalité, alimentation, lot).
+- Proposer un tableau de bord de suivi pour le management.
+
+Données
+- Fichiers tabulaires (CSV/Excel) agrégés par lot/période.
+- Dictionnaire de données (définitions KPI).
+
+Méthodologie (résumé)
+- Nettoyage et normalisation des colonnes, gestion valeurs manquantes.
+- Analyses descriptives et tests simples (corrélations, comparaisons de moyennes si besoin).
+- Modèles de tendance (régression linéaire / lissage) pour anticiper les KPI clés.
+- Visualisations: séries temporelles, barres comparatives, distributions.
+
+Outils
+- Python: pandas, matplotlib, seaborn (éventuellement R pour validation statistique).
+- BI: Tableau ou Power BI pour le dashboard final.
+
+Livrables dans le repo
+- /notebooks/analysis_poulet_bio.ipynb 
+- /dashboard/ : export Tableau/Power BI

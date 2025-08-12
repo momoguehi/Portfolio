@@ -1,0 +1,30 @@
+PROJET 3 – ONG DWFA (Drinking Water For All)
+--------------------------------------------
+Contexte
+L’ONG prépare une demande de financement et veut prioriser les pays/zones à faible accès à l’eau.
+3 domaines d’expertise: (1) création de services d’accès, (2) modernisation d’existants, (3) consulting politique publique.
+Besoin: un tableau de bord (3 vues) pour identifier les pays en difficulté et orienter les efforts.
+
+Objectifs
+- Sélectionner les indicateurs pertinents par domaine (accès, continuité, qualité, besoins en modernisation, etc.).
+- Construire 3 vues claires et accessibles (une par domaine).
+- Permettre le tri/priorisation des pays selon plusieurs critères et seuils.
+
+Données
+- Jeux tabulaires issus d’organismes publics (OMS/FAO/UNICEF, fournis par DWFA) + dictionnaire de données.
+- Format CSV/Excel (géocode pays/ISO3 pour jointures simples).
+
+Méthodologie (résumé)
+- Normalisation/contrôle qualité (types, unités, cohérence annuelle).
+- Création d’indicateurs composés et scoring multi-critères (pondérations simples et transparentes).
+- Construction des 3 vues avec filtres interactifs (pays, région, année, domaine).
+- Export d’une version légère (captures) et d’un package partageable.
+
+Outils
+- Préparation: Python (pandas).
+- Dashboard: Tableau ou Power BI (sans QGIS).
+
+Livrables dans le repo
+- /dashboard/ : histoire Tableau/Power BI exportée + captures.
+- /data/ : tableaux d’indicateurs 
+

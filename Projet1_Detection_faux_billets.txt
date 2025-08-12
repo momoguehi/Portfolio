@@ -1,0 +1,30 @@
+PROJET 1 – Détection de faux billets (ONCFM)
+------------------------------------------------
+Contexte
+L’ONCFM souhaite accélérer l’identification des faux billets en euros via une application de machine learning.
+Un jeu de 1 500 billets scannés (1000 vrais / 500 faux) est fourni avec des caractéristiques géométriques.
+
+Objectifs
+- Explorer et préparer les données (qualité, outliers, corrélations).
+- Comparer plusieurs algorithmes recommandés (K-means, Régression logistique, KNN, Random Forest).
+- Sélectionner un modèle robuste et documenter le choix.
+- Fournir un notebook prédictif prêt à tester sur de nouveaux scans.
+
+Données
+- Fichier tabulaire des 1 500 billets et d’une étiquette (vrai/faux).
+- Dictionnaire de données (noms, unités, description des variables).
+
+Méthodologie (résumé)
+- EDA: distributions, corrélation, réduction de la variance, standardisation.
+- Modélisation supervisée: LogReg, KNN, Random Forest (+ validation croisée et tuning basique).
+- Baseline non supervisée: K-means pour repérer des regroupements (analyse exploratoire).
+- Évaluation: précision/recall/F1, matrice de confusion, courbe ROC-AUC.
+- Interprétation: importance des variables (RF), coefficients (LogReg).
+
+Outils
+- Python: pandas, numpy, scikit-learn, matplotlib, seaborn.
+
+Livrables dans le repo
+- /notebooks/eda_modele_faux_billets.ipynb : EDA + comparaison de modèles.
+- /notebooks/prediction_app.ipynb : fonction prédictive (entrée: mesures billet → sortie: vrai/faux).
+
